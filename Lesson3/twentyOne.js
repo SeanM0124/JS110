@@ -278,8 +278,8 @@ function gameMainBody() { //Main body - houses the rounds, checks score, play ag
 
 function displayTwentyOneRules() { //text blurb for rules etc
   clearScreen();
-  prompt('Welcome to Twenty-One!');
-  prompt('The Rules are as follows:\n   Both the player and dealer will receive two cards to start.');
+  prompt('Welcome to Twenty-One!\n');
+  prompt('The Rules are as follows:\n    Both the player and dealer will receive two cards to start.');
   console.log('    The player will see both their cards, but only one of the dealers cards will be known.');
   console.log(`    The goal of the game is to have a total card value of ${BEST_NUMBER}, or be as close as possible without going over`);
   console.log('    But as long as your cards are of higher total value than the dealers, you win!');
@@ -287,6 +287,7 @@ function displayTwentyOneRules() { //text blurb for rules etc
   console.log(`    The dealer will stop hitting after reaching or exceeding ${HARD_STOP_NUMBER} - You can hit until ${BEST_NUMBER} or bust!`);
   console.log('    The game will continue til best of 5!');
   console.log('    Goodluck!');
+  printLines();
   readyToContinue();
 }
 

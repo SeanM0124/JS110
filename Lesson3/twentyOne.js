@@ -6,19 +6,19 @@ const FACE_CARD_VALUE = 10;
 const HARD_STOP_NUMBER = 17;
 const WIN_CONDITION = 3;
 
-function clearScreen() { //Keeps screen readable
+function clearScreen() {
   console.clear();
 }
 
-function printLines() { ////A flavor/display function - helps organize printed text
+function printLines() {
   console.log('<-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~->');
 }
 
-function prompt(message) { //A flavor/display function
+function prompt(message) {
   console.log(`=> ${message}`);
 }
 
-function shuffle(array) { //shuffles the card deck
+function shuffleDeckOfCards(array) { //shuffles the card deck
   for (let first = array.length - 1; first > 0; first--) {
     let second = Math.floor(Math.random() * (first + 1));
     [array[first], array[second]] = [array[second], array[first]];
@@ -36,112 +36,108 @@ function hand(cards) { //gives easy printing of held cards
 
 function playAgain() { //play again based on user input
   printLines();
-  prompt('Do you want to play again? (y/n)');
-  let answer = readline.question();
+  let answer = readline.question(prompt('Do you want to play again? (y/n)')).toLowerCase();
 
   while (!['y', 'n'].includes(answer)) {
-    prompt('That is not a correct answer, please enter "y" or "n".');
+    answer = readline.question(prompt('That is not a correct answer, please enter "y" or "n".'));
   }
   return answer.toLowerCase() === 'y';
 }
 
 function readyToContinue() { //helps with program control flow - preventing text tidal wave.
-  let answer = readline.question(prompt('Please enter "y" when you are ready to continue.')).toLowerCase();
+  let answer = readline.question(prompt('Please enter any key when you are ready to continue.'));
+  answer = true;
 
-  while (!['y'].includes(answer)) {
-    answer = readline.question(prompt('Waiting for the proper input (y)')).toLowerCase();
-  }
   clearScreen();
-  return answer === 'y';
+  return answer;
 }
 
-function detectResult(dealerTotal, playerTotal) { //decisive function - determines/returns winner
+function detectResult(dealerTotal, playerTotal, scores) { //decisive function - determines/returns winner
   if (playerTotal > BEST_NUMBER) {
+    scores.dealer += 1;
     return 'PLAYER_BUSTED';
   } else if (dealerTotal > BEST_NUMBER) {
+    scores.player += 1;
     return 'DEALER_BUSTED';
   } else if (dealerTotal < playerTotal) {
+    scores.player += 1;
     return 'PLAYER';
   } else if (dealerTotal > playerTotal) {
+    scores.dealer += 1;
     return 'DEALER';
   } else {
+    scores.pushes += 1;
     return 'TIE';
   }
 }
 
-function displayResults(dealerTotal, playerTotal) { //displays result of round based on housed decision functions returned value
-  let result = detectResult(dealerTotal, playerTotal);
+function displayResults(dealerTotal, playerTotal, scores) { //displays result of round based on housed decision functions returned value
+  let result = detectResult(dealerTotal, playerTotal, scores);
 
   switch (result) {
     case 'PLAYER_BUSTED':
-      prompt('You busted! Dealer wins!');
+      prompt('You busted.. Dealer wins the hand!\n');
       break;
     case 'DEALER_BUSTED':
-      prompt('Dealer busted! You win!');
+      prompt('Dealer busted! You won the hand!\n');
       break;
     case 'PLAYER':
-      prompt('You win!');
+      prompt('You won the hand!\n');
       break;
     case 'DEALER':
-      prompt('Dealer wins!');
+      prompt('Dealer wins this hand!\n');
       break;
     case 'TIE':
-      prompt("It's a push!");
+      prompt("It's a push!\n");
   }
 }
 
 function bestOfFiveCheckAndEnd(scores) { //Checks score after each round
   if (scores.player === WIN_CONDITION) {
-    prompt('You won the series!');
+    prompt(`You won the series ${scores.player} hands to ${scores.dealer}!`);
     return scores.player;
   } else if (scores.dealer === WIN_CONDITION) {
-    prompt('You lost the series :(');
+    prompt(`You lost the series ${scores.dealer} hands to ${scores.player} 😰`);
     return scores.dealer;
   }
   return true;
 }
 
-function trackScore(dealerTotal, playerTotal, scores) { //A function that increments score/flavor text
-  if (playerTotal > BEST_NUMBER) {
-    scores.dealer += 1;
-  } else if (dealerTotal > BEST_NUMBER) {
-    scores.player += 1;
-  } else if (dealerTotal < playerTotal) {
-    scores.player += 1;
-  } else if (dealerTotal > playerTotal) {
-    scores.dealer += 1;
-  } else {
-    scores.pushes += 1;
-  }
+function displayScores(scores) {
   prompt(`You have won ${scores.player} hand(s), the dealer has won ${scores.dealer} hand(s).`);
-  prompt(`(${scores.pushes} pushe(s))\n\n`);
+  prompt(`(${scores.pushes} push(es))\n\n`);
 }
 
 function compareAndEnd(playerCards, dealerCards, //Flavor text function that houses the comparative function to determin winner
-  dealerTotal, playerTotal) {
+  dealerTotal, playerTotal, scores) {
   prompt('And the the results are.......\n');
   printLines();
   prompt(`Dealer has ${hand(dealerCards)}, for a total of: ${dealerTotal}`);
   prompt(`Player has ${hand(playerCards)}, for a total of: ${playerTotal}`);
   printLines();
-  displayResults(dealerTotal, playerTotal);
+  displayResults(dealerTotal, playerTotal, scores);
+}
+
+function dealerHits (dealerTotal, deck, dealerCards) {
+  while (dealerTotal < HARD_STOP_NUMBER) {
+    prompt(`Dealer hits!\n`);
+    dealerCards.push(deck.pop());
+    dealerTotal = total(dealerCards);
+    prompt(`The dealers new card is: ${dealerCards[dealerCards.length - 1][1]} of ${dealerCards[dealerCards.length - 1][0]}\n`);
+    prompt(`Dealer's cards are now: ${hand(dealerCards)}, Dealer total: ${dealerTotal}`);
+    printLines();
+    if (dealerTotal > BEST_NUMBER) break;
+    readyToContinue();
+  }
+  return dealerTotal;
 }
 
 function dealersTurn(deck, dealerCards, dealerTotal,) { //dealers turn, hits, total etc
   prompt('Dealers turn...\n');
-
-  while (dealerTotal < HARD_STOP_NUMBER) {
-    prompt(`Dealer hits!`);
-    dealerCards.push(deck.pop());
-    dealerTotal = total(dealerCards);
-    prompt(`Dealer's cards are now: ${hand(dealerCards)}`);
-    prompt(`Dealer total: ${dealerTotal}`);
-    printLines();
-    readyToContinue();
-    if (busted(dealerTotal)) {
-      break;
-    }
-  }
+  prompt(`The Dealers 2nd card is ${dealerCards[1][1]} of ${dealerCards[1][0]}`);
+  prompt(`The dealers total is now ${dealerTotal}\n`);
+  printLines();
+  dealerTotal = dealerHits(dealerTotal, deck, dealerCards);
   if (dealerTotal > HARD_STOP_NUMBER && (!(busted(dealerTotal)))) {
     prompt(`Dealer stays at ${total(dealerCards)}`);
   }
@@ -177,7 +173,7 @@ function doesPlayerWantToHit() { //decision function - checks user input for hit
 
 function playersTurn(deck, playerCards, playerTotal, dealerCards) {
   while (true) {
-    if (playerTotal === BEST_NUMBER) break;
+    if (playerTotal === BEST_NUMBER || playerTotal > BEST_NUMBER) break;
     let playerTurn = doesPlayerWantToHit();
 
     if (playerTurn === 'y') {
@@ -187,11 +183,10 @@ function playersTurn(deck, playerCards, playerTotal, dealerCards) {
     if (playerTurn === 'n' || busted(playerTotal)) break;
   }
   if (playerTotal === BEST_NUMBER) {
-    prompt(`You have 21! Nice! As longs as the dealer doesnt get 21 you win!`);
+    prompt(`You have 21! Nice... As long as the dealer doesnt get 21 you win!`);
     readyToContinue();
   } else if (playerTotal > BEST_NUMBER) {
     prompt('Uh oh....');
-    readyToContinue();
   }
   return playerTotal;
 }
@@ -229,9 +224,7 @@ function gameStart(deck, playerCards, dealerCards) { //deals cards, gets startin
   let playerTotal = total(playerCards);
 
   prompt(`The dealer has: ${dealerCards[0][1]} of ${dealerCards[0][0]} and a face-down card.`);
-  prompt(`You have: ${hand(playerCards)}, your current total is ${playerTotal}\n`);
-
-  return playerTotal;
+  prompt(`You have: ${hand(playerCards)} - your current total is ${playerTotal}\n`);
 }
 
 function initializeDeck() { //creates deck of cards
@@ -242,21 +235,36 @@ function initializeDeck() { //creates deck of cards
       deck.push([SUITS[index], VALUES[count]]);
     }
   }
-  return shuffle(deck);
+  return shuffleDeckOfCards(deck);
 }
 
-function gameRound(scores) { //this is the actual meat of the program, where most of the decitions are kept
+function asLongAsPlayerDoesntBust(playerTotal, deck,
+  playerCards, dealerCards, dealerTotal) {
+  while (true) {
+    playerTotal = playersTurn(deck, playerCards, playerTotal, dealerCards);
+    if (busted(playerTotal)) break;
+    clearScreen();
+    dealerTotal = dealersTurn(deck, dealerCards, dealerTotal);
+    if (dealerTotal === BEST_NUMBER ||
+    dealerTotal > BEST_NUMBER ||
+    dealerTotal >= HARD_STOP_NUMBER) break;
+  }
+  return playerTotal;
+}
+
+function gameRound(scores) { //this is the actual meat of the program, where most of the decisions are kept
   while (scores.player < WIN_CONDITION && scores.dealer < WIN_CONDITION) {
     let deck = initializeDeck();
     let playerCards = [];
     let dealerCards = [];
-    let playerTotal = gameStart(deck, playerCards, dealerCards);
+    gameStart(deck, playerCards, dealerCards);
+    let playerTotal = total(playerCards);
     let dealerTotal = total(dealerCards);
-    playerTotal = playersTurn(deck, playerCards, playerTotal, dealerCards);
-    clearScreen();
-    dealerTotal = dealersTurn(deck, dealerCards, dealerTotal);
-    compareAndEnd(playerCards, dealerCards, dealerTotal, playerTotal);
-    trackScore(dealerTotal, playerTotal, scores);
+    playerTotal = asLongAsPlayerDoesntBust(playerTotal, deck,
+      playerCards, dealerCards, dealerTotal);
+    dealerTotal = total(dealerCards);
+    compareAndEnd(playerCards, dealerCards, dealerTotal, playerTotal, scores);
+    displayScores(scores);
     if (readyToContinue()) continue;
   }
 }
@@ -281,11 +289,11 @@ function displayTwentyOneRules() { //text blurb for rules etc
   prompt('Welcome to Twenty-One!\n');
   prompt('The Rules are as follows:\n    Both the player and dealer will receive two cards to start.');
   console.log('    The player will see both their cards, but only one of the dealers cards will be known.');
-  console.log(`    The goal of the game is to have a total card value of ${BEST_NUMBER}, or be as close as possible without going over`);
-  console.log('    But as long as your cards are of higher total value than the dealers, you win!');
+  console.log(`    The goal of the game is to have a total card value of ${BEST_NUMBER}, or be as close as possible without going over..`);
+  console.log('    As long as your cards are of higher total value than the dealers, you win!');
   console.log(`    But, if you go over ${BEST_NUMBER}, you lose, same goes for the dealer.`);
   console.log(`    The dealer will stop hitting after reaching or exceeding ${HARD_STOP_NUMBER} - You can hit until ${BEST_NUMBER} or bust!`);
-  console.log('    The game will continue til best of 5!');
+  console.log(`    The game will continue til best of ${WIN_CONDITION}!`);
   console.log('    Goodluck!');
   printLines();
   readyToContinue();
@@ -295,7 +303,7 @@ function twentyOneShell() { //houses the main body of the program, start and end
   displayTwentyOneRules();
   gameMainBody();
   clearScreen();
-  prompt("Thanks for playing, comeback soon!");
+  prompt("Thanks for playing, come back soon!");
 }
 
 twentyOneShell(); //Starts whole program

@@ -1,8 +1,10 @@
 const readline = require('readline-sync');
 const INITIAL_MARKER = ' ';
 const HUMAN_MARKER = 'X';
+const PLAYER = 'Player';
+const COMPUTER = 'Computer';
 const COMPUTER_MARKER = 'O';
-const WIN_CONDITION = 1;
+const WIN_CONDITION = 2;
 const WINNING_MOVES = [
   [1, 2, 3], [4, 5, 6], [7, 8, 9], //rows
   [1, 4, 7], [2, 5, 8], [3, 6, 9], //columns
@@ -44,6 +46,16 @@ function initializeBoard() {
   return board;
 }
 
+function readyToContinue() { //helps with program control flow - preventing text tidal wave.
+  let answer = readline.question(prompt('Please enter "y" when you are ready to continue.')).toLowerCase();
+
+  while (!['y'].includes(answer)) {
+    answer = readline.question(prompt('Waiting for the proper input (y)')).toLowerCase();
+  }
+  clearScreen();
+  return answer === 'y';
+}
+
 function displayBoard(board) {
   printLines();
   console.log('');
@@ -66,27 +78,33 @@ function playerChoosesSquare(board) {
   while (true) {
     square = readline.question(joinOr(emptySquares(board))).trim();
     if (emptySquares(board).includes(square)) break;
-    prompt("Sorry, thats not a valid choice.");
+    prompt("Sorry, that is not a valid choice.");
   }
   clearScreen();
   board[square] = HUMAN_MARKER;
 }
 
+function computerChoiceLoops(board, marker) {
+  let square;
+  for (let index = 0; index < WINNING_MOVES.length; index++) {
+    let line = WINNING_MOVES[index];
+    square = findAtRiskSquare(line, board, marker);
+    if (square) return square;
+  }
+  return null;
+}
+
 function computerChoosesSquare(board) {
   let square;
 
-  for (let index = 0; index < WINNING_MOVES.length; index++) {
-    let line = WINNING_MOVES[index];
-    square = findAtRiskSquare(line, board, COMPUTER_MARKER);
-    if (square) break;
-  }
+  square = computerChoiceLoops(board, COMPUTER_MARKER); //winning choice first
 
   if (!square) {
-    for (let index = 0; index < WINNING_MOVES.length; index++) {
-      let line = WINNING_MOVES[index];
-      square = findAtRiskSquare(line, board, HUMAN_MARKER);
-      if (square) break;
-    }
+    square = computerChoiceLoops(board, HUMAN_MARKER); //defensive choice next
+  }
+
+  if (!square && board['5'] === INITIAL_MARKER) {
+    square = '5';
   }
 
   if (!square) {
@@ -142,23 +160,39 @@ function roundResult(board, scores) {
     printLines();
     prompt(`${detectWinner(board)} won this round!`);
   } else {
+    clearScreen();
     prompt("It's a tie!");
   }
   prompt(`Player: ${scores.player} Computer: ${scores.computer} (Ties:${scores.ties})`);
+  readyToContinue();
+}
+
+function choosesSquare(board, player) {
+  if (player === PLAYER) {
+    playerChoosesSquare(board);
+  } else  if (player === COMPUTER) {
+    computerChoosesSquare(board);
+  }
+}
+
+function alternatePlayer(player) {
+  if (player === PLAYER) {
+    return COMPUTER;
+  } else if (player === COMPUTER) {
+    return PLAYER;
+  }
+  return null;
 }
 
 function gameRound(board) {
+  let currentPlayer = getStartChoice();
   while (true) {
     displayBoard(board);
 
-    playerChoosesSquare(board);
-    if (someoneWon(board) || boardFull(board)) {
-      break;
-    }
-    computerChoosesSquare(board);
-    if (someoneWon(board) || boardFull(board)) {
-      break;
-    }
+    choosesSquare(board, currentPlayer);
+    currentPlayer = alternatePlayer(currentPlayer);
+    if (someoneWon(board) || boardFull(board)) break;
+    clearScreen();
   }
 }
 
@@ -216,6 +250,34 @@ function gameMainBody() {
     if (!getUserPlayAgainAnswer()) {
       break;
     }
+  }
+}
+
+function chooseFirstPlayer() {
+  let choiceOfFirstMove = readline.question(prompt('Enter "1" if you want to go first, "2" if you want to go second, or "3" for random.'));
+
+  if (!['1', '2', '3'].includes(choiceOfFirstMove)) {
+    choiceOfFirstMove = readline.question(prompt('The only valid options are 1, 2 or 3'));
+  }
+  return choiceOfFirstMove;
+}
+
+function getStartChoice() {
+  let choice = chooseFirstPlayer();
+  switch (choice) {
+    case '1': return PLAYER;
+    case '2': return COMPUTER;
+    case '3': return randomChoice();
+  }
+  return null;
+}
+
+function randomChoice() {
+  let random = Math.floor(Math.random() * 2) + 1;
+  if (random === 2) {
+    return PLAYER;
+  } else {
+    return COMPUTER;
   }
 }
 

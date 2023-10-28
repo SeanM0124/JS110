@@ -1,0 +1,14 @@
+{
+  "welcome": "Welcome to Tic-Tac-Toe!",
+  "goodbye": "Thanks for playing Sean's Tic Tac Toe!",
+  "chooseTurnOrder": "Enter '1' if you want to go first,'2' if you want to go second, or '3' for random.",
+  "invalidTurnChoice": "The only valid options are 1, 2 or 3",
+  "getUserPlayAgain": "Would you like to play again? (y/n)",
+  "invalidPlayAgain": "Invalid answer - would you like to play again? (y/n)",
+  "lostSeries": "Sorry, you've lost this series 😭",
+  "wonSeries": "Congratulations, you won the series! 🥳",
+  "tie": "Its a tie!",
+  "enterContinue": "Please press the enter key when you are ready to continue.",
+  "rules": "The player who gets three of their marker in a row wins the round!",
+  "rules2": "At start of a series, you will choose who goes first. Each round, it will switch.\n=> Goodluck!\n\n"
+}

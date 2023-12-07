@@ -243,7 +243,7 @@ function randomChoice() {
 function chooseFirstPlayer() { //takes user input and validates
   let choiceOfFirstMove = readline.question(prompt('chooseTurnOrder'));
 
-  if (!['1', '2', '3'].includes(choiceOfFirstMove)) {
+  while (!['1', '2', '3'].includes(choiceOfFirstMove)) {
     choiceOfFirstMove = readline.question(prompt('invalidTurnChoice'));
   }
   return choiceOfFirstMove;
@@ -255,8 +255,8 @@ function getStartChoice() { //function that evaluates player input for who start
     case '1': return COMPUTER; //returns opposeite due to player swap in rounds..
     case '2': return PLAYER; //is accounted for at start of round
     case '3': return randomChoice();
+    default: return COMPUTER;
   }
-  return null;
 }
 
 function firstTo5Wins(scores) { //Holds the rounds and overall game flow.

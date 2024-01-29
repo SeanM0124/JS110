@@ -3,31 +3,46 @@
 // 4th character in every second word converted to
 // uppercase. Other characters should remain the same.
 
-// Examples:
-
 /*
 P/E:
+
+Input: A String of space seperated words
+Output: A similar string, but every 4th character of every 2nd word is uppercased
+
 Rules:
+- For Every 2nd Word -> Uppercase Every 4th char 
 
-Every 4th letter of every 2nd word to uppercase
-Return the new string
-Keep other letters the same.
+DS: Split strings and words into arrays
 
-D - Strings and Arrays
+Performing iteration and transformation
 
 A:
-- Split the string into words (array)
-- Iterate over the words
- -> Odd indices words their 4th index chaacter to uppercase.
-
-- When done iterating, rejoin the string by spaces, return string
-
-
+- Create an array of the strings words:
+ - Iterate over the words:
+ - Is it a word with and even index?
+  - IF yes:
+   - Iterate over its characters:
+    - Is the character's index + 1 % 4 === 0?
+     - If yes, return it uppercased
+     - Otherwise, return it
+    - Join the word back and return it
+  - Join the string back, and return it
 */
 
 function toWeirdCase(string) {
-  
+  let words = string.split(' ');
+
+  let result = words.map((word, index) => {
+    if (index % 2 === 0) return word;
+    return word.split('').map((char, index) => {
+      if ((index + 1) % 4 === 0) return char.toUpperCase();
+      return char;
+    }).join('');
+  }).join(' ');
+  return result;
 }
+
+// Examples:
 
 console.log(
   toWeirdCase('Lorem Ipsum is simply dummy text of the printing world') ===

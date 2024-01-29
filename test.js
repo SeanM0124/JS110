@@ -79,48 +79,87 @@ A:
 */
 
 
-function longestAlternatingSubarray(arr) {
-  let longest = [];
-  let current = [];
-  for (let index = 0; index < arr.length; index++) {
-    if (current.length === 0) {
-      current.push(arr[index]);
-    } else if (arr[index] % 2 !== current[current.length - 1] % 2) {
-      current.push(arr[index]);
-    } else {
-      if (current.length > longest.length) {
-        longest = current;
-      }
-      current = [];
-      current.push(arr[index]);
+// function longestAlternatingSubarray(arr) {
+//   let longest = [];
+//   let current = [];
+//   for (let index = 0; index < arr.length; index++) {
+//     if (current.length === 0) {
+//       current.push(arr[index]);
+//     } else if (arr[index] % 2 !== current[current.length - 1] % 2) {
+//       current.push(arr[index]);
+//     } else {
+//       if (current.length > longest.length) {
+//         longest = current;
+//       }
+//       current = [];
+//       current.push(arr[index]);
+//     }
+//   }
+//   if (current.length > longest.length) {
+//     longest = current;
+//   }
+//   if (longest.length < 2) return [];
+//   return longest;
+// }
+
+// // function longestAlternatingSubarray(array) {
+// //   let result = [];
+
+// //   for (let index = 0; index < array.length; index++) {
+// //     let sliceOf = [];
+// //     sliceOf[0] = array[index];
+// //     if (sliceOf[0] % 2 === 0) {
+
+// //     } 
+// //   }
+// //   return result;
+// // }
+
+// // function isOdd(num) {
+// //   return num % 2 === 1;
+// // }
+
+// console.log(longestAlternatingSubarray([1, 2, 3, 4, 5, 6])); // Expected: [1, 2, 3, 4, 5, 6]
+// console.log(longestAlternatingSubarray([2, 4, 6, 8])); // Expected: []
+// console.log(longestAlternatingSubarray([1, 3, 5, 7])); // Expected: []
+// console.log(longestAlternatingSubarray([1, 1, 3, 7, 8, 5])); // Expected: [7, 8, 5]
+// console.log(longestAlternatingSubarray([4, 6, 7, 12, 11, 9, 17])); // Expected: [6, 7, 12, 11]
+
+/*
+A:
+- Cache the lexicographically sorted target word, in lowercase
+- Init an empty array to push results
+- Iterate over each word in the list:
+ - Make each lowercase and sorted lexicographically.
+ - Compare the selected word strictly to the target word
+  - If equal, push the selected word to the result array
+- Return the result array
+*/
+
+function anagrams(target, list) {
+  let sortedTarget = sortTheWord(target);
+  let result = [];
+  list.forEach(word => {
+    if (sortTheWord(word) === sortedTarget) {
+      result.push(word);
     }
-  }
-  if (current.length > longest.length) {
-    longest = current;
-  }
-  if (longest.length < 2) return [];
-  return longest;
+  });
+  return result;
 }
 
-// function longestAlternatingSubarray(array) {
-//   let result = [];
+function sortTheWord(word) {
+  return word.toLowerCase().split('').sort().join('');
+}
 
-//   for (let index = 0; index < array.length; index++) {
-//     let sliceOf = [];
-//     sliceOf[0] = array[index];
-//     if (sliceOf[0] % 2 === 0) {
+// Test cases
+console.log(anagrams('abba', ['aabb', 'abcd', 'bbaa', 'dada']));
+// ['aabb', 'bbaa']
 
-//     } 
-//   }
-//   return result;
-// }
+console.log(anagrams('racer', ['crazer', 'carer', 'racar', 'caers', 'racer']));
+// ['carer', 'racer']
 
-// function isOdd(num) {
-//   return num % 2 === 1;
-// }
+console.log(anagrams('racer', ['crazer', 'carer', 'racar', 'caers', 'Racer']));
+// ['carer', 'Racer']
 
-console.log(longestAlternatingSubarray([1, 2, 3, 4, 5, 6])); // Expected: [1, 2, 3, 4, 5, 6]
-console.log(longestAlternatingSubarray([2, 4, 6, 8])); // Expected: []
-console.log(longestAlternatingSubarray([1, 3, 5, 7])); // Expected: []
-console.log(longestAlternatingSubarray([1, 1, 3, 7, 8, 5])); // Expected: [7, 8, 5]
-console.log(longestAlternatingSubarray([4, 6, 7, 12, 11, 9, 17])); // Expected: [6, 7, 12, 11]
+console.log(anagrams('laser', ['lazing', 'lazy',  'lacer']));
+// []
